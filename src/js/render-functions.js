@@ -28,17 +28,30 @@ const API_KEY = '43910002-4f8293575df59775d1c0606c1';
 let page = 1;
 let inputValue = '';
 
+function checkInput() {
+  const input = refs.inputSearch.value.trim();
+  if (input === '') {
+    iziToast.show({
+      message: 'Please, enter a search query!',
+      timeout: 5000,
+      backgroundColor: '#EF4040',
+    });
+    return false;
+  }
+  return true;
+}
+
 export function onBtnSearch(event) {
   event.preventDefault();
 
-  if (!Pixibay.checkInput()) {
+  if (!checkInput()) {
     return;
   }
 
   inputValue = refs.inputSearch.value.trim();
   refs.galleryList.innerHTML = '';
   refs.loader.style.display = 'block';
-  page = 1;
+  page = 1; 
 
   getImages();
 }
@@ -62,18 +75,28 @@ async function getImages() {
 
     if (data.hits.length === 0) {
       iziToast.show({
-        message:
-          'Sorry, there are no images matching your search query. Please, try again!',
+        message: 'Sorry, there are no images matching your search query. Please, try again!',
         timeout: 5000,
         backgroundColor: '#EF4040',
       });
+      refs.btnLoadMore.style.display = 'none';
     } else {
+    
       if (page === 1) {
         refs.galleryList.innerHTML = markUpSearchImg(data.hits);
       } else {
         refs.galleryList.insertAdjacentHTML('beforeend', markUpSearchImg(data.hits));
+
+        smoothScroll();
       }
       lightbox.refresh();
+
+
+      if (page * 15 >= data.totalHits) {
+        refs.btnLoadMore.style.display = 'none';
+      } else {
+        refs.btnLoadMore.style.display = 'block';
+      }
     }
     return data.hits;
   } catch (error) {
@@ -86,7 +109,6 @@ async function getImages() {
   } finally {
     refs.loader.style.display = 'none';
     refs.formSearch.reset();
-    refs.btnLoadMore.style.display = 'block';
   }
 }
 
@@ -116,6 +138,14 @@ function markUpSearchImg(arr) {
     )
     .join('');
 }
+function smoothScroll() {
+  const { height: cardHeight } = document.querySelector('.js-list').getBoundingClientRect();
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
+}
+
 
 async function loadImgMore() {
   page += 1;
