@@ -166,3 +166,18 @@ body {
 #btnLoadMore:hover {
   background-color: #6c8cff;
 }
+.loaderNoMore{
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: auto;
+
+  width: 419px;
+  height: 24px;
+  color: #2e2f42;
+  border: 5px solid #fff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+
+}

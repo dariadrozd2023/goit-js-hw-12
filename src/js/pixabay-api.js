@@ -1,43 +1,25 @@
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
+import axios from 'axios';
 
+const URL_SEARCH_IMAGES = 'https://pixabay.com/api/';
+const API_KEY = '43910002-4f8293575df59775d1c0606c1';
 
-const refs = {
-    formSearch: document.getElementById('formSearch'),
-    inputSearch: document.getElementById('inputSearch'),
-    btnSearch: document.getElementById('btnSearch'),
-    galleryList: document.querySelector('.js-ImagesCart'),
-    loader: document.querySelector('.loader'),
-
-  };
-
-  
-  export function checkInput() {
-    const inputValue = refs.inputSearch.value.trim();
-    const placeholderValue = refs.inputSearch.placeholder;
-  
-    if (inputValue === '' || inputValue === placeholderValue) {
-      iziToast.show({
-        message: 'Please, enter the name of the picture you are looking for',
-        timeout: 5000,
-        backgroundColor: '#a0cdde',
-      });
-  
-      refs.btnSearch.disabled = true; // робимо кнопку неактивною
-      return false;
-    } else {
-      refs.btnSearch.disabled = false; // робимо кнопку активною у разі успіху
-      return true;
-    }
+export async function fetchImages(query, page, perPage) {
+  try {
+    const response = await axios.get(URL_SEARCH_IMAGES, {
+      params: {
+        key: API_KEY,
+        q: query,
+        image_type: 'photo',
+        orientation: 'horizontal',
+        safesearch: 'true',
+        lang: 'en',
+        page: page,
+        per_page: perPage,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-  // Додаємо обробники подій до інпуту для очищення та відновлення placeholder
-refs.inputSearch.addEventListener('focus', () => {
-  refs.inputSearch.placeholder = ''; // Очищаємо placeholder при фокусі
-});
-
-refs.inputSearch.addEventListener('blur', () => {
-  if (refs.inputSearch.value.trim() === '') {
-    refs.inputSearch.placeholder = 'Search images...'; // Відновлюємо placeholder при втраті фокуса, якщо інпут порожній
-  }
-});
- 
+}
