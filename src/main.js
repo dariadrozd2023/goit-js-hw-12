@@ -57,21 +57,23 @@ export async function onBtnSearch(event) {
   totalLoadedImages = 0; // Скидаємо лічильник завантажених зображень
   page = 1; // Починаємо з першої сторінки
 
-  await getImages(15); // Завантажуємо першу сторінку зображень
+  await loadImages(); // Завантажуємо першу сторінку зображень
 }
 
-async function getImages(perPage) {
+async function loadImages() {
   try {
-    const data = await fetchImages(inputValue, page, perPage);
+    const data = await fetchImages(inputValue, page, 15);
 
     if (data.hits.length === 0) {
       iziToast.show({
         message: 'Sorry, there are no images matching your search query. Please, try again!',
         timeout: 5000,
         backgroundColor: '#EF4040',
-      });
+        
+      }
+    );
       refs.btnLoadMore.style.display = 'none';
-      refs.loaderNoMore.style.display = 'block';
+      refs.loaderNoMore.style.display = 'none';
     } else {
       totalLoadedImages += data.hits.length;
       totalHits = data.totalHits;
@@ -80,12 +82,10 @@ async function getImages(perPage) {
         refs.galleryList.innerHTML = markUpSearchImg(data.hits);
       } else {
         refs.galleryList.insertAdjacentHTML('beforeend', markUpSearchImg(data.hits));
-        // Прокрутка сторінки після завантаження нової групи зображень
-        smoothScroll();
+        smoothScroll(); // Прокрутка сторінки після завантаження нової групи зображень
       }
       lightbox.refresh(); // Оновлення lightbox після завантаження нових зображень
 
-      // Якщо немає більше результатів для завантаження, приховуємо кнопку "Load More" та показуємо повідомлення
       if (totalLoadedImages >= totalHits) {
         refs.btnLoadMore.style.display = 'none';
         refs.loaderNoMore.style.display = 'block';
@@ -98,7 +98,6 @@ async function getImages(perPage) {
         refs.btnLoadMore.style.display = 'block';
       }
     }
-    return data.hits;
   } catch (error) {
     console.error(error);
     iziToast.show({
@@ -122,19 +121,5 @@ function smoothScroll() {
 
 async function loadImgMore() {
   page += 1;
-
-  try {
-    const data = await getImages(15); // Завантажуємо 15 зображень при кожному натисканні "Load More"
-    refs.galleryList.insertAdjacentHTML('beforeend', markUpSearchImg(data));
-    lightbox.refresh(); // Оновлення lightbox після завантаження нових зображень
-    // Прокрутка сторінки після завантаження нової групи зображень
-    smoothScroll();
-  } catch (error) {
-    console.error(error.message);
-    iziToast.show({
-      message: 'Something went wrong. Please, try again later.',
-      timeout: 5000,
-      backgroundColor: '#EF4040',
-    });
-  }
+  await loadImages(); // Завантажуємо нові зображення при натисканні "Load More"
 }
